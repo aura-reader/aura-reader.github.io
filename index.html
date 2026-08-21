@@ -188,6 +188,42 @@
   .foot-links a:hover{color:#fff}
   .foot-copy{font-size:13px;color:#8a7d6f;text-align:center}
 
+  /* ---------- Auth Modal ---------- */
+  .auth-overlay{position:fixed;inset:0;background:rgba(30,25,20,.55);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+  .auth-overlay.show{opacity:1;pointer-events:auto}
+  .auth-modal{background:var(--card);border-radius:20px;width:400px;max-width:calc(100vw - 48px);padding:36px 32px;box-shadow:0 24px 80px rgba(0,0,0,.25);transform:translateY(12px);transition:transform .25s}
+  .auth-overlay.show .auth-modal{transform:translateY(0)}
+  .auth-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:transparent;font-size:20px;color:var(--text-muted);cursor:pointer;border-radius:8px;transition:background .2s}
+  .auth-close:hover{background:var(--bg-alt)}
+  .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+  .auth-logo .logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#b8845a,#8b5e3c);display:flex;align-items:center;justify-content:center}
+  .auth-logo .name{font-weight:600;font-size:16px;color:var(--text-dark)}
+  .auth-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid var(--border)}
+  .auth-tab{flex:1;padding:10px 0;text-align:center;font-size:15px;font-weight:600;color:var(--text-muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .2s,border-color .2s;font-family:var(--sans)}
+  .auth-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+  .auth-form{display:flex;flex-direction:column;gap:16px}
+  .auth-form.hidden{display:none}
+  .auth-form .field{display:flex;flex-direction:column;gap:6px}
+  .auth-form label{font-size:13px;font-weight:500;color:var(--text-muted)}
+  .auth-form input{height:44px;border:1px solid var(--border);border-radius:10px;padding:0 14px;font-size:15px;font-family:var(--sans);color:var(--text-dark);background:#fff;outline:none;transition:border-color .2s}
+  .auth-form input:focus{border-color:var(--primary)}
+  .auth-btn{height:46px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:opacity .2s;margin-top:4px}
+  .auth-btn:hover{opacity:.9}
+  .auth-btn:disabled{opacity:.6;cursor:not-allowed}
+  .auth-alert{font-size:13px;padding:10px 14px;border-radius:8px;display:none}
+  .auth-alert.show{display:block}
+  .auth-alert.error{background:#fdf0f0;color:#c0392b}
+  .auth-alert.success{background:#f0f8f0;color:var(--accent-green)}
+  .auth-user{display:none;text-align:center;flex-direction:column;gap:16px}
+  .auth-user.show{display:flex}
+  .auth-user .email{font-size:15px;color:var(--text-dark);font-weight:500}
+  .auth-user .plan{display:inline-block;font-size:12px;font-weight:600;padding:4px 12px;border-radius:6px}
+  .auth-user .plan.free{background:#e8f0e4;color:var(--accent-green)}
+  .auth-user .plan.pro{background:#f0e7db;color:var(--primary)}
+  .auth-upgrade{display:block;text-align:center;padding:12px;border-radius:10px;background:var(--primary);color:#fff;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none}
+  .auth-logout{background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;font-family:var(--sans);padding:8px}
+  .auth-logout:hover{color:var(--primary)}
+
   /* ---------- Responsive ---------- */
   @media (max-width:1100px){
     .wrap{padding:0 48px}
@@ -231,7 +267,7 @@
     <div class="nav-links">
       <a href="#features" data-i18n="nav.features"></a>
       <a href="#pricing" data-i18n="nav.pricing"></a>
-      <a href="https://aura-reader.github.io/login.html" target="_blank" class="nav-login" data-i18n="nav.login"></a>
+      <a href="https://aura-reader.github.io/login.html" target="_blank" class="nav-login" data-i18n="nav.login" onclick="openAuthModal();return false"></a>
       <span class="lang-switch">
         <button id="lang-zh" onclick="setLang('zh')">中</button>
         <button id="lang-en" class="active" onclick="setLang('en')">EN</button>
@@ -553,10 +589,47 @@
     <a href="#pricing" data-i18n="nav.pricing"></a>
     <a href="#faq" data-i18n="nav.faq"></a>
     <a href="https://github.com/aura-reader" target="_blank" data-i18n="nav.github"></a>
-    <a href="https://aura-reader.github.io/login.html" target="_blank" data-i18n="nav.login"></a>
+    <a href="https://aura-reader.github.io/login.html" target="_blank" data-i18n="nav.login" onclick="openAuthModal();return false"></a>
   </div>
   <div class="foot-copy" data-i18n="footer.copy"></div>
 </footer>
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="authOverlay" onclick="if(event.target===this)closeAuthModal()">
+  <div class="auth-modal" style="position:relative">
+    <button class="auth-close" onclick="closeAuthModal()">&times;</button>
+    <div class="auth-logo">
+      <span class="logo"><svg width="16" height="16" viewBox="0 0 40 40" fill="none"><rect x="9" y="8" width="11" height="24" rx="2" fill="#fff"/><rect x="20" y="8" width="11" height="24" rx="2" fill="#fff" opacity=".85"/><rect x="19" y="8" width="2" height="24" fill="#b8845a"/></svg></span>
+      <span class="name" data-i18n="brand"></span>
+    </div>
+    <div class="auth-alert" id="authAlert"></div>
+    <!-- Forms -->
+    <div id="authForms">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')" data-i18n="auth.login"></button>
+        <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')" data-i18n="auth.register"></button>
+      </div>
+      <form class="auth-form" id="loginForm" onsubmit="return doLogin(event)">
+        <div class="field"><label data-i18n="auth.email"></label><input type="email" id="loginEmail" placeholder="you@example.com" required></div>
+        <div class="field"><label data-i18n="auth.password"></label><input type="password" id="loginPassword" placeholder="********" required></div>
+        <button type="submit" class="auth-btn" id="loginBtn" data-i18n="auth.login"></button>
+      </form>
+      <form class="auth-form hidden" id="registerForm" onsubmit="return doRegister(event)">
+        <div class="field"><label data-i18n="auth.email"></label><input type="email" id="regEmail" placeholder="you@example.com" required></div>
+        <div class="field"><label data-i18n="auth.password"></label><input type="password" id="regPassword" placeholder="********" required></div>
+        <div class="field"><label data-i18n="auth.confirm"></label><input type="password" id="regPassword2" placeholder="********" required></div>
+        <button type="submit" class="auth-btn" id="registerBtn" data-i18n="auth.register"></button>
+      </form>
+    </div>
+    <!-- Logged in view -->
+    <div class="auth-user" id="authUser">
+      <div class="email" id="authUserEmail"></div>
+      <div><span class="plan free" id="authUserPlan">Free</span></div>
+      <a class="auth-upgrade" id="authUpgrade" href="https://creem.io/pay/prod_6uXEIs0CjyYKzcJn6J6jJF" target="_blank" data-i18n="auth.upgrade"></a>
+      <button class="auth-logout" onclick="doLogout()" data-i18n="auth.logout"></button>
+    </div>
+  </div>
+</div>
 
 <script>
 const I18N = {
@@ -616,7 +689,9 @@ const I18N = {
     "dl.edge.name":"Edge",
     "dl.firefox.name":"Firefox",
     "dl.note":"",
-    "footer.copy":"© 2026 境相阅读 Aura Reader · 一款为 Markdown 打造的温润阅读器"
+    "footer.copy":"© 2026 境相阅读 Aura Reader · 一款为 Markdown 打造的温润阅读器",
+    "auth.login":"登录","auth.register":"注册","auth.email":"邮箱","auth.password":"密码","auth.confirm":"确认密码",
+    "auth.upgrade":"购买 Pro · $12.99","auth.logout":"退出登录","auth.errEmpty":"请填写所有字段","auth.errShort":"密码至少 8 位","auth.errMatch":"两次密码不一致","auth.errNetwork":"网络错误，请检查连接后重试","auth.errFail":"操作失败，请重试","auth.successReg":"注册成功！","auth.welcome":"已登录"
   },
   en:{
     "brand":"Aura Reader",
@@ -674,7 +749,9 @@ const I18N = {
     "dl.edge.name":"Edge",
     "dl.firefox.name":"Firefox",
     "dl.note":"",
-    "footer.copy":"© 2026 Aura Reader · A warm Markdown reader and writer"
+    "footer.copy":"© 2026 Aura Reader · A warm Markdown reader and writer",
+    "auth.login":"Login","auth.register":"Register","auth.email":"Email","auth.password":"Password","auth.confirm":"Confirm Password",
+    "auth.upgrade":"Buy Pro · $12.99","auth.logout":"Log Out","auth.errEmpty":"Please fill in all fields","auth.errShort":"Password must be at least 8 characters","auth.errMatch":"Passwords do not match","auth.errNetwork":"Network error. Please check your connection.","auth.errFail":"Operation failed. Please try again.","auth.successReg":"Account created!","auth.welcome":"Logged in"
   }
 };
 let currentLang = "en";
@@ -699,6 +776,144 @@ function toggleFaq(btn){
   const ans = btn.nextElementSibling;
   ans.classList.toggle("open");
 }
+
+// ---------- Auth Modal ----------
+const AUTH_API = 'https://aura-reader-api.fenghua25.workers.dev';
+const AUTH_TOKEN_KEY = 'aura-jwt';
+const AUTH_STATUS_KEY = 'aura-pro-status';
+
+function openAuthModal(){
+  const overlay = document.getElementById('authOverlay');
+  overlay.classList.add('show');
+  if(localStorage.getItem(AUTH_TOKEN_KEY)){
+    checkAuthStatus();
+  }
+}
+function closeAuthModal(){
+  document.getElementById('authOverlay').classList.remove('show');
+}
+function switchAuthTab(tab){
+  const tl = document.getElementById('tabLogin');
+  const tr = document.getElementById('tabRegister');
+  const lf = document.getElementById('loginForm');
+  const rf = document.getElementById('registerForm');
+  const alertEl = document.getElementById('authAlert');
+  alertEl.classList.remove('show','error','success');
+  if(tab === 'login'){
+    tl.classList.add('active'); tr.classList.remove('active');
+    lf.classList.remove('hidden'); rf.classList.add('hidden');
+  } else {
+    tr.classList.add('active'); tl.classList.remove('active');
+    rf.classList.remove('hidden'); lf.classList.add('hidden');
+  }
+}
+function showAuthAlert(type, msg){
+  const el = document.getElementById('authAlert');
+  el.textContent = msg;
+  el.className = 'auth-alert show ' + type;
+}
+function getAuthEmail(){
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if(!token) return null;
+  try { return JSON.parse(atob(token.split('.')[1])).email; } catch { return null; }
+}
+async function doLogin(e){
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const t = I18N[currentLang];
+  if(!email || !password){ showAuthAlert('error', t['auth.errEmpty']); return false; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  try {
+    const res = await fetch(AUTH_API + '/api/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    const data = await res.json();
+    if(data.token){
+      localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+      await checkAuthStatus();
+    } else {
+      showAuthAlert('error', data.error || t['auth.errFail']);
+    }
+  } catch { showAuthAlert('error', t['auth.errNetwork']); }
+  btn.disabled = false;
+  return false;
+}
+async function doRegister(e){
+  e.preventDefault();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const password2 = document.getElementById('regPassword2').value;
+  const t = I18N[currentLang];
+  if(!email || !password){ showAuthAlert('error', t['auth.errEmpty']); return false; }
+  if(password.length < 8){ showAuthAlert('error', t['auth.errShort']); return false; }
+  if(password !== password2){ showAuthAlert('error', t['auth.errMatch']); return false; }
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true;
+  try {
+    const res = await fetch(AUTH_API + '/api/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    const data = await res.json();
+    if(data.token){
+      localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+      await checkAuthStatus();
+    } else {
+      showAuthAlert('error', data.error || t['auth.errFail']);
+    }
+  } catch { showAuthAlert('error', t['auth.errNetwork']); }
+  btn.disabled = false;
+  return false;
+}
+async function checkAuthStatus(){
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if(!token) return;
+  const email = getAuthEmail();
+  document.getElementById('authUserEmail').textContent = email || '';
+  document.getElementById('authForms').style.display = 'none';
+  document.getElementById('authUser').classList.add('show');
+  try {
+    const res = await fetch(AUTH_API + '/api/user/status', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    if(res.status === 401){
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(AUTH_STATUS_KEY);
+      document.getElementById('authForms').style.display = '';
+      document.getElementById('authUser').classList.remove('show');
+      return;
+    }
+    const data = await res.json();
+    localStorage.setItem(AUTH_STATUS_KEY, JSON.stringify({paid:data.paid, plan:data.plan, cachedAt:Date.now()}));
+    const badge = document.getElementById('authUserPlan');
+    const upgrade = document.getElementById('authUpgrade');
+    if(data.paid){
+      badge.textContent = 'Pro'; badge.className = 'plan pro';
+      upgrade.style.display = 'none';
+    } else {
+      badge.textContent = 'Free'; badge.className = 'plan free';
+      upgrade.style.display = '';
+    }
+  } catch {
+    const cached = JSON.parse(localStorage.getItem(AUTH_STATUS_KEY) || '{}');
+    const badge = document.getElementById('authUserPlan');
+    if(cached.paid){ badge.textContent = 'Pro'; badge.className = 'plan pro'; }
+  }
+}
+function doLogout(){
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(AUTH_STATUS_KEY);
+  document.getElementById('authUser').classList.remove('show');
+  document.getElementById('authForms').style.display = '';
+  document.getElementById('loginForm').classList.remove('hidden');
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('tabLogin').classList.add('active');
+  document.getElementById('tabRegister').classList.remove('active');
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeAuthModal(); });
 setLang(currentLang);
 </script>
 </body>
