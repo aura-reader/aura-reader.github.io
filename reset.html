@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura Reader — Reset Password</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf8f5; --primary:#8b5e3c; --text-dark:#3d3327; --text-muted:#7a6b5d;
+    --card:#fdfbf8; --border:#e0d6c8; --radius:16px; --shadow:0 12px 40px rgba(60,50,35,.06);
+    --sans:"Inter",-apple-system,"Segoe UI",Roboto,sans-serif;
+    --serif:"Noto Serif SC",Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text-dark);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .reset-card{background:var(--card);border-radius:20px;width:420px;max-width:100%;padding:40px 32px;box-shadow:var(--shadow);border:1px solid var(--border)}
+  .logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
+  .logo .icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#b8845a,#8b5e3c);display:flex;align-items:center;justify-content:center}
+  .logo .name{font-weight:600;font-size:18px;color:var(--text-dark)}
+  h1{font-size:22px;font-weight:600;text-align:center;margin-bottom:8px;color:var(--text-dark)}
+  .sub{font-size:14px;color:var(--text-muted);text-align:center;margin-bottom:28px;line-height:1.5}
+  .form{display:flex;flex-direction:column;gap:16px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:13px;font-weight:500;color:var(--text-muted)}
+  .field input{height:44px;border:1px solid var(--border);border-radius:10px;padding:0 14px;font-size:15px;font-family:var(--sans);color:var(--text-dark);background:#fff;outline:none;transition:border-color .2s}
+  .field input:focus{border-color:var(--primary)}
+  .btn{height:46px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:opacity .2s;margin-top:4px}
+  .btn:hover{opacity:.9}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .alert{font-size:14px;padding:12px 14px;border-radius:8px;text-align:center;display:none}
+  .alert.show{display:block}
+  .alert.error{background:#fdf0f0;color:#c0392b}
+  .alert.success{background:#f0f8f0;color:#2d7a2d}
+  .login-link{text-align:center;margin-top:20px;font-size:14px}
+  .login-link a{color:var(--primary);text-decoration:none;font-weight:500}
+  .login-link a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="reset-card">
+  <div class="logo">
+    <span class="icon"><svg width="16" height="16" viewBox="0 0 40 40" fill="none"><rect x="9" y="8" width="11" height="24" rx="2" fill="#fff"/><rect x="20" y="8" width="11" height="24" rx="2" fill="#fff" opacity=".85"/><rect x="19" y="8" width="2" height="24" fill="#b8845a"/></svg></span>
+    <span class="name">Aura Reader</span>
+  </div>
+  <h1 id="title">Set New Password</h1>
+  <p class="sub" id="subTitle">Enter your new password below</p>
+  <div class="alert" id="alert"></div>
+  <form class="form" id="resetForm" onsubmit="return doReset(event)">
+    <div class="field">
+      <label id="lblPass">New Password</label>
+      <input type="password" id="password" placeholder="********" required>
+    </div>
+    <div class="field">
+      <label id="lblConfirm">Confirm Password</label>
+      <input type="password" id="password2" placeholder="********" required>
+    </div>
+    <button type="submit" class="btn" id="submitBtn">Reset Password</button>
+  </form>
+  <div class="login-link" id="loginLink" style="display:none">
+    <a href="https://aura-reader.github.io">Back to Home</a>
+  </div>
+</div>
+<script>
+const API = 'https://aura-reader-api.fenghua25.workers.dev';
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get('token');
+
+// Detect language from browser
+const isZh = navigator.language.startsWith('zh');
+const T = isZh ? {
+  title:'设置新密码', subTitle:'请在下方输入新密码',
+  lblPass:'新密码', lblConfirm:'确认密码', btn:'重置密码',
+  errEmpty:'请填写所有字段', errShort:'密码至少 8 位', errMatch:'两次密码不一致',
+  errToken:'链接无效或已过期，请重新申请重置', errFail:'操作失败，请重试',
+  success:'密码重置成功！正在跳转登录...', loginLink:'返回首页'
+} : {
+  title:'Set New Password', subTitle:'Enter your new password below',
+  lblPass:'New Password', lblConfirm:'Confirm Password', btn:'Reset Password',
+  errEmpty:'Please fill in all fields', errShort:'Password must be at least 8 characters', errMatch:'Passwords do not match',
+  errToken:'Link is invalid or expired. Please request a new reset link.', errFail:'Operation failed. Please try again.',
+  success:'Password reset successful! Redirecting to login...', loginLink:'Back to Home'
+};
+
+// Apply text
+document.getElementById('title').textContent = T.title;
+document.getElementById('subTitle').textContent = T.subTitle;
+document.getElementById('lblPass').textContent = T.lblPass;
+document.getElementById('lblConfirm').textContent = T.lblConfirm;
+document.getElementById('submitBtn').textContent = T.btn;
+
+if(!token){
+  showAlert('error', T.errToken);
+  document.getElementById('resetForm').style.display = 'none';
+}
+
+function showAlert(type, msg){
+  const el = document.getElementById('alert');
+  el.textContent = msg;
+  el.className = 'alert show ' + type;
+}
+
+async function doReset(e){
+  e.preventDefault();
+  const password = document.getElementById('password').value;
+  const password2 = document.getElementById('password2').value;
+
+  if(!password || !password2){ showAlert('error', T.errEmpty); return false; }
+  if(password.length < 8){ showAlert('error', T.errShort); return false; }
+  if(password !== password2){ showAlert('error', T.errMatch); return false; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(API + '/api/auth/reset-confirm', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token, password})
+    });
+    const data = await res.json();
+
+    if(data.ok){
+      showAlert('success', T.success);
+      document.getElementById('resetForm').style.display = 'none';
+      document.getElementById('loginLink').style.display = 'block';
+      document.querySelector('.login-link a').textContent = T.loginLink;
+      setTimeout(() => { window.location.href = 'https://aura-reader.github.io'; }, 3000);
+    } else {
+      showAlert('error', data.error === 'Invalid or expired token' || data.error === 'Token expired' ? T.errToken : T.errFail);
+    }
+  } catch {
+    showAlert('error', T.errFail);
+  }
+  btn.disabled = false;
+  return false;
+}
+</script>
+</body>
+</html>

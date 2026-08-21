@@ -223,6 +223,9 @@
   .auth-upgrade{display:block;text-align:center;padding:12px;border-radius:10px;background:var(--primary);color:#fff;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none}
   .auth-logout{background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;font-family:var(--sans);padding:8px}
   .auth-logout:hover{color:var(--primary)}
+  .auth-forgot{text-align:center;font-size:13px;color:var(--primary);text-decoration:none;margin-top:4px;cursor:pointer}
+  .auth-forgot:hover{text-decoration:underline}
+  .auth-reset-hint{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:4px;line-height:1.5}
 
   /* ---------- Responsive ---------- */
   @media (max-width:1100px){
@@ -613,12 +616,20 @@
         <div class="field"><label data-i18n="auth.email"></label><input type="email" id="loginEmail" placeholder="you@example.com" required></div>
         <div class="field"><label data-i18n="auth.password"></label><input type="password" id="loginPassword" placeholder="********" required></div>
         <button type="submit" class="auth-btn" id="loginBtn" data-i18n="auth.login"></button>
+        <a href="#" class="auth-forgot" onclick="switchAuthView('reset');return false" data-i18n="auth.forgot"></a>
       </form>
       <form class="auth-form hidden" id="registerForm" onsubmit="return doRegister(event)">
         <div class="field"><label data-i18n="auth.email"></label><input type="email" id="regEmail" placeholder="you@example.com" required></div>
         <div class="field"><label data-i18n="auth.password"></label><input type="password" id="regPassword" placeholder="********" required></div>
         <div class="field"><label data-i18n="auth.confirm"></label><input type="password" id="regPassword2" placeholder="********" required></div>
         <button type="submit" class="auth-btn" id="registerBtn" data-i18n="auth.register"></button>
+      </form>
+      <!-- Reset request form -->
+      <form class="auth-form hidden" id="resetForm" onsubmit="return doResetRequest(event)">
+        <p class="auth-reset-hint" data-i18n="auth.resetHint"></p>
+        <div class="field"><label data-i18n="auth.email"></label><input type="email" id="resetEmail" placeholder="you@example.com" required></div>
+        <button type="submit" class="auth-btn" id="resetBtn" data-i18n="auth.sendReset"></button>
+        <a href="#" class="auth-forgot" onclick="switchAuthView('login');return false" data-i18n="auth.backLogin"></a>
       </form>
     </div>
     <!-- Logged in view -->
@@ -691,7 +702,8 @@ const I18N = {
     "dl.note":"",
     "footer.copy":"© 2026 境相阅读 Aura Reader · 一款为 Markdown 打造的温润阅读器",
     "auth.login":"登录","auth.register":"注册","auth.email":"邮箱","auth.password":"密码","auth.confirm":"确认密码",
-    "auth.upgrade":"购买 Pro · $12.99","auth.logout":"退出登录","auth.errEmpty":"请填写所有字段","auth.errShort":"密码至少 8 位","auth.errMatch":"两次密码不一致","auth.errNetwork":"网络错误，请检查连接后重试","auth.errFail":"操作失败，请重试","auth.successReg":"注册成功！","auth.welcome":"已登录"
+    "auth.upgrade":"购买 Pro · $12.99","auth.logout":"退出登录","auth.errEmpty":"请填写所有字段","auth.errShort":"密码至少 8 位","auth.errMatch":"两次密码不一致","auth.errNetwork":"网络错误，请检查连接后重试","auth.errFail":"操作失败，请重试","auth.successReg":"注册成功！","auth.welcome":"已登录",
+    "auth.forgot":"忘记密码？","auth.resetHint":"输入注册邮箱，我们将发送密码重置链接","auth.sendReset":"发送重置邮件","auth.backLogin":"返回登录","auth.resetSent":"重置邮件已发送，请检查邮箱","auth.resetSuccess":"密码重置成功！请重新登录"
   },
   en:{
     "brand":"Aura Reader",
@@ -751,7 +763,8 @@ const I18N = {
     "dl.note":"",
     "footer.copy":"© 2026 Aura Reader · A warm Markdown reader and writer",
     "auth.login":"Login","auth.register":"Register","auth.email":"Email","auth.password":"Password","auth.confirm":"Confirm Password",
-    "auth.upgrade":"Buy Pro · $12.99","auth.logout":"Log Out","auth.errEmpty":"Please fill in all fields","auth.errShort":"Password must be at least 8 characters","auth.errMatch":"Passwords do not match","auth.errNetwork":"Network error. Please check your connection.","auth.errFail":"Operation failed. Please try again.","auth.successReg":"Account created!","auth.welcome":"Logged in"
+    "auth.upgrade":"Buy Pro · $12.99","auth.logout":"Log Out","auth.errEmpty":"Please fill in all fields","auth.errShort":"Password must be at least 8 characters","auth.errMatch":"Passwords do not match","auth.errNetwork":"Network error. Please check your connection.","auth.errFail":"Operation failed. Please try again.","auth.successReg":"Account created!","auth.welcome":"Logged in",
+    "auth.forgot":"Forgot password?","auth.resetHint":"Enter your registered email and we'll send you a password reset link","auth.sendReset":"Send Reset Email","auth.backLogin":"Back to Login","auth.resetSent":"Reset email sent. Please check your inbox.","auth.resetSuccess":"Password reset successful! Please log in again."
   }
 };
 let currentLang = "en";
@@ -797,14 +810,34 @@ function switchAuthTab(tab){
   const tr = document.getElementById('tabRegister');
   const lf = document.getElementById('loginForm');
   const rf = document.getElementById('registerForm');
+  const resetF = document.getElementById('resetForm');
   const alertEl = document.getElementById('authAlert');
   alertEl.classList.remove('show','error','success');
+  resetF.classList.add('hidden');
   if(tab === 'login'){
     tl.classList.add('active'); tr.classList.remove('active');
     lf.classList.remove('hidden'); rf.classList.add('hidden');
   } else {
     tr.classList.add('active'); tl.classList.remove('active');
     rf.classList.remove('hidden'); lf.classList.add('hidden');
+  }
+}
+function switchAuthView(view){
+  const lf = document.getElementById('loginForm');
+  const rf = document.getElementById('registerForm');
+  const resetF = document.getElementById('resetForm');
+  const tl = document.getElementById('tabLogin');
+  const tr = document.getElementById('tabRegister');
+  const alertEl = document.getElementById('authAlert');
+  alertEl.classList.remove('show','error','success');
+  if(view === 'reset'){
+    lf.classList.add('hidden'); rf.classList.add('hidden');
+    resetF.classList.remove('hidden');
+    tl.classList.remove('active'); tr.classList.remove('active');
+  } else {
+    resetF.classList.add('hidden');
+    lf.classList.remove('hidden'); rf.classList.add('hidden');
+    tl.classList.add('active'); tr.classList.remove('active');
   }
 }
 function showAuthAlert(type, msg){
@@ -864,6 +897,23 @@ async function doRegister(e){
     } else {
       showAuthAlert('error', data.error || t['auth.errFail']);
     }
+  } catch { showAuthAlert('error', t['auth.errNetwork']); }
+  btn.disabled = false;
+  return false;
+}
+async function doResetRequest(e){
+  e.preventDefault();
+  const email = document.getElementById('resetEmail').value.trim();
+  const t = I18N[currentLang];
+  if(!email){ showAuthAlert('error', t['auth.errEmpty']); return false; }
+  const btn = document.getElementById('resetBtn');
+  btn.disabled = true;
+  try {
+    await fetch(AUTH_API + '/api/auth/reset-request', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email})
+    });
+    showAuthAlert('success', t['auth.resetSent']);
   } catch { showAuthAlert('error', t['auth.errNetwork']); }
   btn.disabled = false;
   return false;
