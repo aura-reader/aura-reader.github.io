@@ -43,7 +43,7 @@
   .btn-install:hover{opacity:.9}
 
   /* ---------- Hero ---------- */
-  .hero{padding:120px 0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:24px}
+  .hero{padding:48px 0 120px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:24px}
   .eyebrow{font-size:14px;font-weight:500;letter-spacing:.08em;color:var(--primary);margin-top:8px}
   .hero h1{font-family:var(--serif);font-weight:700;font-size:64px;line-height:1.15;color:var(--text-dark);max-width:960px}
   .hero .sub{font-size:20px;color:var(--text-muted);max-width:760px;white-space:pre-line}
@@ -499,7 +499,7 @@
           <li data-i18n="price.pro.f5"></li>
           <li data-i18n="price.pro.f6"></li>
         </ul>
-        <button class="price-btn pro-btn" data-i18n="price.pro.btn" onclick="window.open('https://creem.io/pay/prod_6uXEIs0CjyYKzcJn6J6jJF','_blank')"></button>
+        <button class="price-btn pro-btn" data-i18n="price.pro.btn" onclick="window.open('https://creem.io/payment/prod_6uXEIs0CjyYKzcJn6J6jJF','_blank')"></button>
       </div>
     </div>
   </div>
@@ -636,7 +636,7 @@
     <div class="auth-user" id="authUser">
       <div class="email" id="authUserEmail"></div>
       <div><span class="plan free" id="authUserPlan">Free</span></div>
-      <a class="auth-upgrade" id="authUpgrade" href="https://creem.io/pay/prod_6uXEIs0CjyYKzcJn6J6jJF" target="_blank" data-i18n="auth.upgrade"></a>
+      <a class="auth-upgrade" id="authUpgrade" href="https://creem.io/payment/prod_6uXEIs0CjyYKzcJn6J6jJF" target="_blank" data-i18n="auth.upgrade"></a>
       <button class="auth-logout" onclick="doLogout()" data-i18n="auth.logout"></button>
     </div>
   </div>
@@ -783,6 +783,7 @@ function setLang(lang){
   });
   document.getElementById("lang-zh").classList.toggle("active", lang==="zh");
   document.getElementById("lang-en").classList.toggle("active", lang==="en");
+  updateNavAuth();
 }
 function toggleFaq(btn){
   btn.classList.toggle("open");
@@ -794,6 +795,26 @@ function toggleFaq(btn){
 const AUTH_API = 'https://aura-reader-api.fenghua25.workers.dev';
 const AUTH_TOKEN_KEY = 'aura-jwt';
 const AUTH_STATUS_KEY = 'aura-pro-status';
+
+function updateNavAuth(){
+  const navLinks = document.querySelectorAll('[data-i18n="nav.login"]');
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if(token){
+    let email = null;
+    try { email = JSON.parse(atob(token.split('.')[1])).email; } catch {}
+    navLinks.forEach(el => {
+      if(email){
+        el.textContent = email.split('@')[0];
+      } else {
+        el.textContent = currentLang === 'zh' ? '我的账户' : 'Account';
+      }
+    });
+  } else {
+    navLinks.forEach(el => {
+      el.textContent = I18N[currentLang]['nav.login'];
+    });
+  }
+}
 
 function openAuthModal(){
   const overlay = document.getElementById('authOverlay');
@@ -952,6 +973,7 @@ async function checkAuthStatus(){
     const badge = document.getElementById('authUserPlan');
     if(cached.paid){ badge.textContent = 'Pro'; badge.className = 'plan pro'; }
   }
+  updateNavAuth();
 }
 function doLogout(){
   localStorage.removeItem(AUTH_TOKEN_KEY);
@@ -962,6 +984,7 @@ function doLogout(){
   document.getElementById('registerForm').classList.add('hidden');
   document.getElementById('tabLogin').classList.add('active');
   document.getElementById('tabRegister').classList.remove('active');
+  updateNavAuth();
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeAuthModal(); });
 setLang(currentLang);
