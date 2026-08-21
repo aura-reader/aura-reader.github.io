@@ -116,8 +116,8 @@
   <script>
     const API_BASE = 'https://aura-reader-api.fenghua25.workers.dev';
     const TOKEN_KEY = 'aura-jwt';
-    // Lemon Squeezy checkout URL (replace with your actual checkout URL)
-    const LEMON_CHECKOUT_URL = 'https://aura-reader.lemonsqueezy.com/checkout/buy/variant-XXXX';
+    // Creem checkout URL
+    const CREEM_CHECKOUT_URL = 'https://creem.io/pay/prod_6uXEIs0CjyYKzcJn6J6jJF';
 
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
     function clearToken() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem('aura-pro-status'); }
@@ -202,7 +202,7 @@
       btn.querySelector('.spinner').classList.remove('hidden');
       btn.disabled = true;
 
-      // Open Lemon Squeezy checkout in new tab
+      // Open Creem checkout in new tab
       window.open(LEMON_CHECKOUT_URL, '_blank');
 
       // Switch to processing view
