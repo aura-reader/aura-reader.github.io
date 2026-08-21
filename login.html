@@ -9,7 +9,7 @@
 <body>
   <div class="page">
     <div class="logo">
-      <div class="logo-mark">境</div>
+      <div class="logo-mark"></div>
       <span class="logo-text">Aura Reader</span>
     </div>
 
@@ -268,6 +268,7 @@
       registerForm.classList.add('hidden');
       document.querySelector('.auth-tabs').classList.add('hidden');
       document.getElementById('loggedInView').classList.remove('hidden');
+      consumeRedirect();
     }
 
     // --- Logout ---
@@ -290,6 +291,17 @@
     const redirect = params.get('redirect');
     if (redirect) {
       sessionStorage.setItem('aura-redirect', redirect);
+    }
+
+    // --- Consume stored redirect after successful login (site-internal only) ---
+    function consumeRedirect() {
+      const dest = sessionStorage.getItem('aura-redirect');
+      sessionStorage.removeItem('aura-redirect');
+      if (dest && dest.startsWith('/') && !dest.startsWith('//') && !dest.includes('://')) {
+        window.location.href = dest;
+        return true;
+      }
+      return false;
     }
   </script>
 </body>

@@ -9,7 +9,7 @@
 <body>
   <div class="page">
     <div class="logo">
-      <div class="logo-mark">境</div>
+      <div class="logo-mark"></div>
       <span class="logo-text">Aura Reader</span>
     </div>
 
@@ -30,7 +30,7 @@
         <ul class="feature-list">
           <li>WYSIWYG editing & write back to file</li>
           <li>File management (multi-root / drag-and-drop)</li>
-          <li>All 44 themes</li>
+          <li>All 20 themes</li>
           <li>HTML / PDF / Word export</li>
           <li>Save external documents locally</li>
           <li>Lifetime updates</li>
@@ -60,7 +60,7 @@
         <ul class="feature-list">
           <li>WYSIWYG editing & write back to file</li>
           <li>File management (multi-root / drag-and-drop)</li>
-          <li>All 44 themes</li>
+          <li>All 20 themes</li>
           <li>HTML / PDF / Word export</li>
           <li>Save external documents locally</li>
           <li>Lifetime updates</li>
@@ -72,7 +72,7 @@
         </button>
 
         <p class="text-muted mt-16" style="font-size:12px;">
-          Secure checkout by Lemon Squeezy. Instant activation.
+          Secure checkout by Creem. Instant activation.
         </p>
       </div>
     </div>
@@ -117,7 +117,7 @@
     const API_BASE = 'https://aura-reader-api.fenghua25.workers.dev';
     const TOKEN_KEY = 'aura-jwt';
     // Creem checkout URL
-    const CREEM_CHECKOUT_URL = 'https://creem.io/pay/prod_6uXEIs0CjyYKzcJn6J6jJF';
+    const CREEM_CHECKOUT_URL = 'https://creem.io/payment/prod_6uXEIs0CjyYKzcJn6J6jJF';
 
     function getToken() { return localStorage.getItem(TOKEN_KEY); }
     function clearToken() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem('aura-pro-status'); }
@@ -203,7 +203,7 @@
       btn.disabled = true;
 
       // Open Creem checkout in new tab
-      window.open(LEMON_CHECKOUT_URL, '_blank');
+      window.open(CREEM_CHECKOUT_URL, '_blank');
 
       // Switch to processing view
       freePlanView.classList.add('hidden');
